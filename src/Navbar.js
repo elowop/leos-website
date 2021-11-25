@@ -2,48 +2,45 @@ import './css/Navbar.css';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/List';
 import ListItemButton from '@material-ui/core/List';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import SubjectIcon from "@material-ui/icons/Mail";
+import {useNavigate} from 'react-router-dom';
 
 const Navbar = ( props ) => {
+    const navigate = useNavigate();
 
     const navbarItems = [
         {
             text: 'WHO WE ARE',
-            icon: <SubjectIcon color="secondary" />,
-            path: '/' 
+            path: '/who-we-are' 
         },
         {
             text: 'INITIATIVES',
-            icon: <SubjectIcon color="secondary" />,
-            path: '/' 
+            path: '/intiatives' 
         },
         {
             text: 'CALANDAR',
-            icon: <SubjectIcon color="secondary" />,
-            path: '/' 
+            path: '/calandar' 
         },
         {
             text: 'CONTACT US',
-            icon: <SubjectIcon color="secondary" />,
-            path: '/' 
+            path: '/contact-us' 
         },
         {
             text: 'JOIN THE LEOS',
-            icon: <SubjectIcon color="secondary" />,
-            path: '/' 
+            path: '/join-the-leos' 
         },
     ]
     return ( 
         <div className="Navbar">
             <List>
-                {navbarItems.map(item =>  {
-                    <ListItem key={item.text}>
-                        <ListItemIcon>{item.icon}</ListItemIcon>
+                {navbarItems.map(item =>  (
+                    <ListItem 
+                    button 
+                    key={item.text}
+                    onClick={() => navigate(item.path)}>
                         <ListItemText primary={item.text} />
                     </ListItem>
-                })}
+                ))}
             </List>
         </div>
      );

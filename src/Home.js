@@ -1,5 +1,4 @@
 import Navbar from './Navbar.js'
-import Logo from './images/leo.svg'
 import HomeImage from './images/home_image.jpg'
 import './css/Home.css'
 
