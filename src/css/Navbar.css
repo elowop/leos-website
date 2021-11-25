@@ -5,7 +5,8 @@
     z-index: 1; 
     top: 0; 
     left: 0; 
-    background-color:#232323; 
+    /*background-color:#232323; */
+    background-color: white;
     transition: .5s ease; 
     overflow-x: hidden; 
     padding-top: 20px; 
