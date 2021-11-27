@@ -1,6 +1,8 @@
 import './css/Navbar.css';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/List';
+import ListItemButton from '@mui/material/ListItemButton';
+
 import ListItemText from '@material-ui/core/ListItemText';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -8,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
 import { Collapse } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 /* For all pages except the HomePage, we will have the props set to these default values */
 const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
@@ -41,6 +44,23 @@ const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
         },
     ]
 
+    const StyledList = styled(List)({
+        // selected and (selected + hover) states
+        '&& .Mui-selected, && .Mui-selected:hover': {
+          backgroundColor: 'red',
+          '&, & .MuiListItemIcon-root': {
+            color: 'pink',
+          },
+        },
+        // hover states
+        '& .MuiListItemButton-root:hover': {
+          backgroundColor: 'orange',
+          '&, & .MuiListItemIcon-root': {
+            color: 'yellow',
+          },
+        },
+      });
+
     const handleExpandClick = () => {
         if (isCollapsible)
         {
@@ -62,16 +82,15 @@ const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
                         <ArrowCircleLeftIcon />
                     </IconButton>}
 
-                    <List>
+                    <StyledList className="navbar_list">
                         {navbarItems.map(item =>  (
-                            <ListItem 
-                            button 
+                            <ListItemButton  
                             key={item.text}
                             onClick={() => navigate(item.path)}>
                                 <ListItemText primary={item.text} />
-                            </ListItem>
+                            </ListItemButton>
                         ))}
-                    </List>
+                    </StyledList>
                 </div>  
             </Collapse>
         </div>  

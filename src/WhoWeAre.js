@@ -50,6 +50,8 @@ const WhoWeAre = () => {
             <div style={styles}>
               <BGImage bg={WhoWeAreImage} tint="#CD853F" />
             </div>
+
+            
             
             
         </div>
