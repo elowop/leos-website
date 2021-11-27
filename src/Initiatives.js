@@ -1,5 +1,9 @@
+import Navbar from './Navbar.js'
+
 const Initiatives = () => {
-    return ( <div></div> );
+    return ( <div>
+        <Navbar />
+    </div> );
 }
  
 export default Initiatives;

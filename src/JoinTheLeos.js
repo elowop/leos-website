@@ -1,5 +1,9 @@
+import Navbar from './Navbar.js'
+
 const JoinTheLeos = () => {
-    return ( <div></div> );
+    return ( <div>
+        <Navbar />
+    </div> );
 }
  
 export default JoinTheLeos;

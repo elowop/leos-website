@@ -12,7 +12,7 @@ const Home = () => {
                 <h1>we are Oakville leos</h1>
             </div>
                 
-            <Navbar />
+            <Navbar isCollapsible={false} isHomePage={true}/>
         </div>
      );
 }
