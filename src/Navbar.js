@@ -1,16 +1,14 @@
 import './css/Navbar.css';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/List';
-import ListItemButton from '@mui/material/ListItemButton';
-
-import ListItemText from '@material-ui/core/ListItemText';
+import List from './../node_modules/@material-ui/core/List';
+import ListItemButton from './../node_modules/@mui/material/ListItemButton';
+import ListItemText from './../node_modules/@material-ui/core/ListItemText';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import IconButton from '@mui/material/IconButton';
-import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import { Collapse } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import IconButton from './../node_modules/@mui/material/IconButton';
+import ArrowCircleLeftIcon from './../node_modules/@mui/icons-material/ArrowCircleLeft';
+import ArrowCircleRightIcon from './../node_modules/@mui/icons-material/ArrowCircleRight';
+import { Collapse } from './../node_modules/@mui/material';
+import { styled } from './../node_modules/@mui/material/styles';
 
 /* For all pages except the HomePage, we will have the props set to these default values */
 const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
@@ -31,8 +29,8 @@ const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
             path: '/intiatives' 
         },
         {
-            text: 'CALANDAR',
-            path: '/calandar' 
+            text: 'CALENDAR',
+            path: '/calendar' 
         },
         {
             text: 'CONTACT US',
