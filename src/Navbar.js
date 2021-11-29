@@ -75,12 +75,14 @@ const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
                     <ArrowCircleRightIcon />
                 </IconButton>
             </Collapse>
-            
             <Collapse in={expanded} orientation='vertical'>
                 <div className="Navbar_Internal">   
-                    {!isHomePage && <IconButton onClick={handleExpandClick}>
-                        <ArrowCircleLeftIcon />
-                    </IconButton>}
+                    {!isHomePage ? 
+                    <div className="button-position">
+                        <IconButton onClick={handleExpandClick}>
+                            <ArrowCircleLeftIcon />
+                        </IconButton>
+                    </div> : null}
 
                     <StyledList className="navbar_list">
                         {navbarItems.map(item =>  (
