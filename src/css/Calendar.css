@@ -7,6 +7,12 @@
 }
 
 .add-calendar-event {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.calendar-event-button {
     float: right;
 }
 
