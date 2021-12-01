@@ -84,30 +84,30 @@ const Calendar = () => {
                     <h1>Add an Event</h1>
                     <TextField
                         required
-                        onChange={onEventNameTextChange}
                         value={eventNameTextValue}
+                        onChange={onEventNameTextChange}
                         label={"Event Name"}
                     />
                     <DateTimePicker label={"Date & Time of the Event"}/>
                     <TextField
                         required
-                        onChange={onLocationTextChange}
                         value={locationTextValue}
+                        onChange={onLocationTextChange}
                         label={"Event Location"}
                     />
                     <TextField
-                        label={"Event Description"}
                         multiline
                         maxRows={4}
                         value={eventDescTextValue}
                         onChange={onEventDescTextChange}
+                        label={"Event Description"}
                     />
                     <TextField
-                        label={"Notes for Attendees"}
                         multiline
                         maxRows={4}
                         value={notesTextValue}
                         onChange={onNotesTextChange}
+                        label={"Notes for Attendees"}
                     />
                     <Button variant="contained">Submit</Button>
                 </div>

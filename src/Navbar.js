@@ -36,10 +36,6 @@ const Navbar = ( {isCollapsible = true, isHomePage = false } ) => {
             text: 'CONTACT US',
             path: '/contact-us' 
         },
-        {
-            text: 'JOIN THE LEOS',
-            path: '/join-the-leos' 
-        },
     ]
 
     const StyledList = styled(List)({
