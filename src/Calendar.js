@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
 const Calendar = () => {
+    // make historical events that wont be cleared after 30 day expiry
     const [date, setDate] = useState(new Date());
     const [_tileContent, _SetTileContent] = useState("This will hold information about events (where/when they will happen).");
     const [expanded, setExpanded] = useState(false);
