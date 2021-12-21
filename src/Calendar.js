@@ -8,44 +8,84 @@ import IconButton from './../node_modules/@mui/material/IconButton';
 import Slide from './../node_modules/@mui/material/Slide';
 import CancelIcon from './../node_modules/@mui/icons-material/Cancel';
 import { Collapse } from './../node_modules/@mui/material';
-import DateTimePicker from './DateTimePicker.js'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import axios from 'axios';
+import CalendarEventInfo from './CalendarEventInfo.js';
+import AdapterDateFns from './../node_modules/@mui/lab/AdapterDateFns';
+import LocalizationProvider from './../node_modules/@mui/lab/LocalizationProvider';
+import DesktopDateTimePicker from '@mui/lab/DesktopDateTimePicker';
 
 const Calendar = () => {
-    // make historical events that wont be cleared after 30 day expiry
+    // Calendar Function ToDo:
+    // -have events expire once there is a 30 day gap between the current date and the event date
+    // -make historical events that wont be cleared after 30 day expiry
+    // -make list of events instantly update on delete/add
+    // -add a section to include optional images of the event
+    // -add a verification to make sure the user doesn't accidentally delete an event
+    
     const [date, setDate] = useState(new Date());
-    const [_tileContent, _SetTileContent] = useState("This will hold information about events (where/when they will happen).");
     const [expanded, setExpanded] = useState(false);
     const [eventNameTextValue, setEventNameTextValue] = useState("");
+    const [eventDateValue, setEventDateValue] = useState(new Date());
     const [locationTextValue, setLocationTextValue] = useState("");
     const [eventDescTextValue, setEventDescTextValue] = useState("");
     const [notesTextValue, setNotesTextValue] = useState("");
+    const [eventsToday, setEventsToday] = useState([]);
 
-    function setTileContent(date) {
-        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        var day = days[ date.getDay() ];
+    var currentYear = new Date().getFullYear();
+    var currentMonth = new Date().getMonth();
+    var allEvents;
 
-        setDate(date);
-
-        switch (day) {
-            case 'Friday':
-                _SetTileContent("Leos Meeting Today @ 6PM!");
-                break;
-            default:
-                _SetTileContent("Nothing!");
-                break;
-          }
+    function sameDay(d1, d2) {
+        return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
     }
 
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
+    function setTileContent(date) {
+        setDate(date);
 
+        var allEventsToday = allEvents.filter(e => {
+            var responseDate = new Date(e.eventDate);
+            return sameDay(responseDate, date);
+        });
+
+        setEventsToday(allEventsToday);
+    }
+
+    const handleExpandClick = () => setExpanded(!expanded);
     const onEventNameTextChange = (e) => setEventNameTextValue(e.target.value);
+    const onEventDateChange = (e) => setEventDateValue(e);
     const onLocationTextChange = (e) => setLocationTextValue(e.target.value);
     const onEventDescTextChange = (e) => setEventDescTextValue(e.target.value);
     const onNotesTextChange = (e) => setNotesTextValue(e.target.value);
+
+    const trySubmit = () => {
+        if (eventNameTextValue.length > 0 && locationTextValue.length > 0 && eventDescTextValue.length > 0)
+        {
+            
+            var formSubmission = {
+                eventName: eventNameTextValue,
+                eventDate: eventDateValue.toJSON(),
+                eventLocation: locationTextValue,
+                eventDescription: eventDescTextValue,
+                notes: notesTextValue.trim() === "" ? "Nothing to note." : notesTextValue
+                // POST requests fail if an empty string is passed in so we must default a value in this case
+            }
+  
+            axios.post('http://localhost:5000/calendarEvents/add', formSubmission)
+                .then(() => {
+                    handleExpandClick();
+                });
+        }
+    };
+
+    // Get all the events stored in the database so that they may be displayed
+    axios.get('http://localhost:5000/calendarEvents/')
+            .then(response => {
+                allEvents = response.data;
+            });
 
     return ( 
     <div className='calendar-main-div'>
@@ -61,19 +101,23 @@ const Calendar = () => {
             <div className='calendar-container'>
                 <ReactCalendar 
                 className="react-calendar"
-                minDetail='day'
+                minDate={new Date(currentYear, currentMonth, 1)} // We don't want to see any events older than the current month
+                minDetail='month'
                 maxDetail='month'
                 onChange={(date) => setTileContent(date)}
                 value={date} 
                 defaultValue={date}
                 />
                 <p className='text-center'>
-                {date.toDateString()}
+                    {date.toDateString()}
                 </p> 
-                <p>
-                    {_tileContent}
-                </p>
+
+                <div className='calendar-event-info-box'>
+                    <CalendarEventInfo allEventsToday={eventsToday}/>
+                </div>
             </div>
+
+            
         </Collapse>
 
         <Slide direction="up" in={expanded}>
@@ -89,7 +133,16 @@ const Calendar = () => {
                         onChange={onEventNameTextChange}
                         label={"Event Name"}
                     />
-                    <DateTimePicker label={"Date & Time of the Event"}/>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DesktopDateTimePicker
+                        value={eventDateValue}
+                        onChange={(newValue) => {
+                            onEventDateChange(newValue);
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                        />
+                    </LocalizationProvider>
+                    
                     <TextField
                         required
                         value={locationTextValue}
@@ -110,7 +163,7 @@ const Calendar = () => {
                         onChange={onNotesTextChange}
                         label={"Notes for Attendees"}
                     />
-                    <Button variant="contained">Submit</Button>
+                    <Button variant="contained" onClick={trySubmit}>Submit</Button>
                 </div>
             </div>
         </Slide>

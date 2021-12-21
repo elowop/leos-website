@@ -1,10 +1,9 @@
-import Home from './Home.js'
+import Home from './Home.js'; 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import WhoWeAre from './WhoWeAre.js'
-import Initiatives from './Initiatives.js'
-import Calendar from './Calendar.js'
-import ContactUs from './ContactUs.js'
-
+import WhoWeAre from './WhoWeAre.js';
+import Initiatives from './Initiatives.js';
+import Calendar from './Calendar.js';
+import ContactUs from './ContactUs.js';
 import './css/App.css';
 
 function App() {
