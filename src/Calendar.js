@@ -11,10 +11,19 @@ import { Collapse } from './../node_modules/@mui/material';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import axios from 'axios';
-import CalendarEventInfo from './CalendarEventInfo.js';
 import AdapterDateFns from './../node_modules/@mui/lab/AdapterDateFns';
 import LocalizationProvider from './../node_modules/@mui/lab/LocalizationProvider';
 import DesktopDateTimePicker from '@mui/lab/DesktopDateTimePicker';
+import Alert from '@mui/material/Alert';
+import CloseIcon from '@mui/icons-material/Close';
+import ListItemButton from './../node_modules/@mui/material/ListItemButton';
+import ListItemText from './../node_modules/@material-ui/core/ListItemText';
+import Link from '@mui/material/Link';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Calendar = () => {
     // Calendar Function ToDo:
@@ -32,6 +41,11 @@ const Calendar = () => {
     const [eventDescTextValue, setEventDescTextValue] = useState("");
     const [notesTextValue, setNotesTextValue] = useState("");
     const [eventsToday, setEventsToday] = useState([]);
+    const [expandedEventInfo, setExpandedEventInfo] = useState(false);
+    const [currentEvent, setCurrentEvent] = useState([]);
+    const [openEnsureDelete, setOpenEnsureDelete] = useState(false);
+    const [openSuccessAlert, setOpenSuccessAlert] = useState(false);
+    const [openErrorAlert, setOpenErrorAlert] = useState(false);
 
     var currentYear = new Date().getFullYear();
     var currentMonth = new Date().getMonth();
@@ -77,9 +91,36 @@ const Calendar = () => {
             axios.post('http://localhost:5000/calendarEvents/add', formSubmission)
                 .then(() => {
                     handleExpandClick();
+                    setEventsToday([...eventsToday, formSubmission]);
                 });
         }
     };
+
+    const expandEventView = (e) => {
+        setExpandedEventInfo(!expandedEventInfo);
+        setCurrentEvent(e);
+    };
+
+    const deleteEvent = (id) => {
+        axios.delete('http://localhost:5000/calendarEvents/' + id)
+            .then(() => {
+                expandEventView(currentEvent);
+                var newEventsToday = eventsToday.filter(e => e._id != id);
+                setEventsToday(newEventsToday);
+                setOpenSuccessAlert(true);
+            })
+            .catch((err) => {
+                setOpenErrorAlert(true);
+            });
+    };
+
+    const handleClickOpenEnsureDelete = () => { setOpenEnsureDelete(true); };
+    const handleCloseEnsureDelete = (willDeleteEvent) => {  
+        if (willDeleteEvent) {
+            deleteEvent(currentEvent._id)
+        }
+        setOpenEnsureDelete(false);
+     };
 
     // Get all the events stored in the database so that they may be displayed
     axios.get('http://localhost:5000/calendarEvents/')
@@ -91,6 +132,47 @@ const Calendar = () => {
     <div className='calendar-main-div'>
         <Navbar />
         <Collapse in={!expanded}>
+
+            <Collapse in={openSuccessAlert}>
+                <Alert
+                action={
+                    <IconButton
+                    aria-label="close"
+                    color="inherit"
+                    size="small"
+                    onClick={() => {
+                        setOpenSuccessAlert(false);
+                    }}
+                    >
+                    <CloseIcon fontSize="inherit" />
+                    </IconButton>
+                }
+                sx={{ mb: 2 }}
+                >
+                EVENT DELETED
+                </Alert>
+            </Collapse>
+            <Collapse in={openErrorAlert}>
+                <Alert
+                severity="error"
+                action={
+                    <IconButton
+                    aria-label="close"
+                    color="inherit"
+                    size="small"
+                    onClick={() => {
+                        setOpenErrorAlert(false);
+                    }}
+                    >
+                    <CloseIcon fontSize="inherit" />
+                    </IconButton>
+                }
+                sx={{ mb: 2 }}
+                >
+                FAILED TO DELETE: Give database time to update before trying again
+                </Alert>
+            </Collapse>
+            
             <div className='calendar-page-title'>
                 <h1>Event Calendar</h1>
                 <IconButton className='calendar-event-button' onClick={handleExpandClick}>
@@ -113,9 +195,64 @@ const Calendar = () => {
                 </p> 
 
                 <div className='calendar-event-info-box'>
-                    <CalendarEventInfo allEventsToday={eventsToday}/>
-                </div>
+
+                    <Collapse in={!expandedEventInfo}>
+                    {
+                        eventsToday.length === 0 ? <div>No Events</div> : 
+                        eventsToday.map(event => {
+                            return (
+                                <div>
+                                    <Link underline='hover' onClick={() => {
+                                        expandEventView(event);
+                                        
+                                        }}>{event.eventName}</Link>
+                                </div>
+                            );
+                        })
+                    }
+                    </Collapse>
+                    <Slide direction="up" in={expandedEventInfo}>
+                        <div>
+                            <IconButton className="calendar-event-button" onClick={() => expandEventView(currentEvent)}>
+                                <CancelIcon />
+                            </IconButton>
+                                
+                                <h2>{currentEvent.eventName}</h2>
+                                <h4>{currentEvent.eventDate}</h4>
+                                <h4>{currentEvent.eventLocation}</h4>
+                                <h4>{currentEvent.eventDescription}</h4>
+                                <h4>{currentEvent.notes}</h4>
+                                <ListItemButton  
+                                key="DELETE EVENT"
+                                onClick={handleClickOpenEnsureDelete}>
+                                    <ListItemText primary="DELETE EVENT" />
+                                </ListItemButton>
+                            </div>
+                    </Slide>
+
+                    <Dialog
+                        open={openEnsureDelete}
+                        onClose={handleCloseEnsureDelete}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">
+                            {"Are you sure you want to delete this event?"}
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                The event will be gone forever if you choose to do so!
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => handleCloseEnsureDelete(false)}>Cancel</Button>
+                            <Button onClick={() => handleCloseEnsureDelete(true)} autoFocus>
+                                Delete
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
             </div>
+        </div>
 
             
         </Collapse>
