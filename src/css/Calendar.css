@@ -19,3 +19,13 @@
 .react-calendar {
     width: 100%;
 }
+
+.regular-tile {
+    color:#dab85a;
+}
+
+.event-tile {
+    color: black;
+    background-color: rgb(65, 184, 35);
+    display: inline-block;
+}
