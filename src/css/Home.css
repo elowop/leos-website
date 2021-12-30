@@ -1,11 +1,12 @@
 .home_page {
-    position: relative;
+    position: fixed;
     overflow: hidden;
 }
 
 .home_image {
     width: 100vw;
     height: 100vh;
+    /* overflow: hidden; */
 }
 
 .main_title {

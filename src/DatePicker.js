@@ -6,19 +6,14 @@ import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import {useState, props} from 'react';
 
 export default function MaterialUIPickers(props) {
-  const [value, setValue] = useState(new Date());
-
-  const handleChange = (newValue) => {
-    setValue(newValue);
-  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DesktopDatePicker
           label={props.label}
           inputFormat="MM/dd/yyyy"
-          value={value}
-          onChange={handleChange}
+          value={props?.value ?? new Date()}
+          onChange={(event, value) => props.setNewDate(event)}
           renderInput={(params) => <TextField {...params} />}
         />
     </LocalizationProvider>
