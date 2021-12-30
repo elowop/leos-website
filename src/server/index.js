@@ -18,9 +18,11 @@ connection.once('open', () => {
 
 const calendarEventsRouter = require('./routes/calendarEvents');
 const usersRouter = require('./routes/users');
+const loginsRouter = require('./routes/logins');
 
 app.use('/calendarEvents', calendarEventsRouter);
 app.use('/users', usersRouter);
+app.use('/logins', loginsRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

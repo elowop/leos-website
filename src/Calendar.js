@@ -45,9 +45,23 @@ const Calendar = () => {
     const [openErrorAlert, setOpenErrorAlert] = useState(false);
     const [allEvents, setAllEvents] = useState([]);
     const [hasEvents, setHasEvents] = useState(true);
+
+    // using Navbar we can set sessionStorage and then have useStates which check if the sessionStorage is true/false or nonempty or w.e. to determine if isUser or isAdmin or neither
+
+    // By default, entering the webpage the client is neither a recognized user nor an admin. Once credentials are provided, they may be given user/admin access. Users will be able to see
+    // Calendar Events while admins will have User privileges plus the ability to add/remove Calendar Events and Initatives.
+    const [isUser, setIsUser] = useState(sessionStorage.getItem('user') == null ? false : true);
+    const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem('admin') == null ? false : true);
     var currentYear = new Date().getFullYear();
     var currentMonth = new Date().getMonth();
 
+    // This is called in the Navbar, where we notify the Calendar component that we just added a user/admin to the sessionStorage and we may want to update the component based
+    // on the clients new permissions.
+    const receiveChildNotif = () => {
+        setIsUser(sessionStorage.getItem('user') == null ? false : true);
+        setIsAdmin(sessionStorage.getItem('admin') == null ? false : true);
+      };
+    
     // On loading the calendar page, we should have 0 events and a default assumption that events might exist (i.e. hasEvents useState == true). Thus we make 1 GET request
     // and if we find no events in the database, we set hasEvents to false so that we do not end up infinitely making GET requests.
     if (allEvents.length === 0 && hasEvents) {
@@ -168,178 +182,189 @@ const Calendar = () => {
 
     return ( 
     <div className='calendar-main-div'>
-        <Navbar />
-            <Collapse in={!expanded}>
-                <Collapse in={openSuccessAlert}>
-                    <Alert
-                    action={
-                        <IconButton
-                        aria-label="close"
-                        color="inherit"
-                        size="small"
-                        onClick={() => {
-                            setOpenSuccessAlert(false);
-                        }}
-                        >
-                        <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                    sx={{ mb: 2 }}
-                    >
-                    EVENT DELETED
-                    </Alert>
-                </Collapse>
-                <Collapse in={openErrorAlert}>
-                    <Alert
-                    severity="error"
-                    action={
-                        <IconButton
-                        aria-label="close"
-                        color="inherit"
-                        size="small"
-                        onClick={() => {
-                            setOpenErrorAlert(false);
-                        }}
-                        >
-                        <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                    sx={{ mb: 2 }}
-                    >
-                    FAILED TO DELETE: Give database time to update before trying again
-                    </Alert>
-                </Collapse>
-                
-                <div className='calendar-page-title'>
-                    <h1>Event Calendar</h1>
-                    <IconButton className='calendar-event-button' onClick={handleExpandClick}>
-                        <AddCircleSharpIcon />
-                    </IconButton>
-                </div>
-
-                <div className='calendar-container'>
-                    <ReactCalendar 
-                    className="react-calendar"
-                    minDate={new Date(currentYear, currentMonth, 1)} // We don't want to see any events older than the current month
-                    minDetail='month'
-                    maxDetail='month'
-                    onChange={(date) => setTileContent(date)}
-                    value={date} 
-                    defaultValue={date}
-                    tileClassName={tileClassName}
-                    />
-                    <p className='text-center'>
-                        {date.toDateString()}
-                    </p> 
-
-                    <div className='calendar-event-info-box'>
-
-                        <Collapse in={!expandedEventInfo}>
-                        {
-                            eventsToday.length === 0 ? <div>No Events</div> : 
-                            eventsToday.map(event => {
-                                return (
-                                    <div>
-                                        <Link underline='hover' onClick={() => {
-                                            expandEventView(event);
-                                            
-                                            }}>{event.eventName}</Link>
-                                    </div>
-                                );
-                            })
-                        }
-                        </Collapse>
-                        <Slide direction="up" in={expandedEventInfo}>
-                            <div>
-                                <IconButton className="calendar-event-button" onClick={() => expandEventView(currentEvent)}>
-                                    <CancelIcon />
-                                </IconButton>
-                                    
-                                    <h2>{currentEvent.eventName}</h2>
-                                    <h4>{currentEvent.eventDate}</h4>
-                                    <h4>{currentEvent.eventLocation}</h4>
-                                    <h4>{currentEvent.eventDescription}</h4>
-                                    <h4>{currentEvent.notes}</h4>
-                                    <ListItemButton  
-                                    key="DELETE EVENT"
-                                    onClick={handleClickOpenEnsureDelete}>
-                                        <ListItemText primary="DELETE EVENT" />
-                                    </ListItemButton>
-                                </div>
-                        </Slide>
-
-                        <Dialog
-                            open={openEnsureDelete}
-                            onClose={handleCloseEnsureDelete}
-                            aria-labelledby="alert-dialog-title"
-                            aria-describedby="alert-dialog-description"
-                        >
-                            <DialogTitle id="alert-dialog-title">
-                                {"Are you sure you want to delete this event?"}
-                            </DialogTitle>
-                            <DialogContent>
-                                <DialogContentText id="alert-dialog-description">
-                                    The event will be gone forever if you choose to do so!
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => handleCloseEnsureDelete(false)}>Cancel</Button>
-                                <Button onClick={() => handleCloseEnsureDelete(true)} autoFocus>
-                                    Delete
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                    </div>
-                </div>  
+        <Navbar fromChildToParentCallback={receiveChildNotif}/>
+            <Collapse in={!isUser && !isAdmin}>
+                <h2>You must be logged in to view this page</h2>
             </Collapse>
-
-            <Slide direction="up" in={expanded}>
-                <div>
-                    <IconButton className="calendar-event-button" onClick={handleExpandClick}>
-                        <CancelIcon />
-                    </IconButton>
-                    <div className="add-calendar-event">
-                        <h1>Add an Event</h1>
-                        <TextField
-                            required
-                            value={eventNameTextValue}
-                            onChange={onEventNameTextChange}
-                            label={"Event Name"}
-                        />
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <DesktopDateTimePicker
-                            value={eventDateValue}
-                            onChange={(newValue) => {
-                                onEventDateChange(newValue);
+            
+            <Collapse in={isUser || isAdmin}>
+                <Collapse in={!expanded}>
+                    <Collapse in={openSuccessAlert}>
+                        <Alert
+                        action={
+                            <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                setOpenSuccessAlert(false);
                             }}
-                            renderInput={(params) => <TextField {...params} />}
-                            />
-                        </LocalizationProvider>
-                        
-                        <TextField
-                            required
-                            value={locationTextValue}
-                            onChange={onLocationTextChange}
-                            label={"Event Location"}
-                        />
-                        <TextField
-                            multiline
-                            maxRows={4}
-                            value={eventDescTextValue}
-                            onChange={onEventDescTextChange}
-                            label={"Event Description"}
-                        />
-                        <TextField
-                            multiline
-                            maxRows={4}
-                            value={notesTextValue}
-                            onChange={onNotesTextChange}
-                            label={"Notes for Attendees"}
-                        />
-                        <Button variant="contained" onClick={trySubmit}>Submit</Button>
+                            >
+                            <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                        sx={{ mb: 2 }}
+                        >
+                        EVENT DELETED
+                        </Alert>
+                    </Collapse>
+                    <Collapse in={openErrorAlert}>
+                        <Alert
+                        severity="error"
+                        action={
+                            <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                setOpenErrorAlert(false);
+                            }}
+                            >
+                            <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        }
+                        sx={{ mb: 2 }}
+                        >
+                        FAILED TO DELETE: Give database time to update before trying again
+                        </Alert>
+                    </Collapse>
+                    
+                    <div className='calendar-page-title'>
+                        <h1>Event Calendar</h1>
+                        <Collapse in={isAdmin}>
+                            <IconButton className='calendar-event-button' onClick={handleExpandClick}>
+                                <AddCircleSharpIcon />
+                            </IconButton>
+                        </Collapse>
                     </div>
-                </div>
-            </Slide>
+
+                    <div className='calendar-container'>
+                        <ReactCalendar 
+                        className="react-calendar"
+                        minDate={new Date(currentYear, currentMonth, 1)} // We don't want to see any events older than the current month
+                        minDetail='month'
+                        maxDetail='month'
+                        onChange={(date) => setTileContent(date)}
+                        value={date} 
+                        defaultValue={date}
+                        tileClassName={tileClassName}
+                        />
+                        <p className='text-center'>
+                            {date.toDateString()}
+                        </p> 
+
+                        <div className='calendar-event-info-box'>
+
+                            <Collapse in={!expandedEventInfo}>
+                            {
+                                eventsToday.length === 0 ? <div>No Events</div> : 
+                                eventsToday.map(event => {
+                                    return (
+                                        <div>
+                                            <Link underline='hover' onClick={() => {
+                                                expandEventView(event);
+                                                
+                                                }}>{event.eventName}</Link>
+                                        </div>
+                                    );
+                                })
+                            }
+                            </Collapse>
+                            <Slide direction="up" in={expandedEventInfo}>
+                                <div>
+                                    <IconButton className="calendar-event-button" onClick={() => expandEventView(currentEvent)}>
+                                        <CancelIcon />
+                                    </IconButton>
+                                        
+                                        <h2>{currentEvent.eventName}</h2>
+                                        <h4>{currentEvent.eventDate}</h4>
+                                        <h4>{currentEvent.eventLocation}</h4>
+                                        <h4>{currentEvent.eventDescription}</h4>
+                                        <h4>{currentEvent.notes}</h4>
+                                        <Collapse in={isAdmin}>
+                                            <ListItemButton  
+                                            key="DELETE EVENT"
+                                            onClick={handleClickOpenEnsureDelete}>
+                                                <ListItemText primary="DELETE EVENT" />
+                                            </ListItemButton>
+                                        </Collapse>
+                                    </div>
+                            </Slide>
+
+                            <Dialog
+                                open={openEnsureDelete}
+                                onClose={handleCloseEnsureDelete}
+                                aria-labelledby="alert-dialog-title"
+                                aria-describedby="alert-dialog-description"
+                            >
+                                <DialogTitle id="alert-dialog-title">
+                                    {"Are you sure you want to delete this event?"}
+                                </DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText id="alert-dialog-description">
+                                        The event will be gone forever if you choose to do so!
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={() => handleCloseEnsureDelete(false)}>Cancel</Button>
+                                    <Button onClick={() => handleCloseEnsureDelete(true)} autoFocus>
+                                        Delete
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </div>
+                    </div>  
+                </Collapse>
+
+                <Slide direction="up" in={expanded}>
+                    <div>
+                        <IconButton className="calendar-event-button" onClick={handleExpandClick}>
+                            <CancelIcon />
+                        </IconButton>
+                        <div className="add-calendar-event">
+                            <h1>Add an Event</h1>
+                            <TextField
+                                required
+                                value={eventNameTextValue}
+                                onChange={onEventNameTextChange}
+                                label={"Event Name"}
+                            />
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <DesktopDateTimePicker
+                                value={eventDateValue}
+                                onChange={(newValue) => {
+                                    onEventDateChange(newValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} />}
+                                />
+                            </LocalizationProvider>
+                            
+                            <TextField
+                                required
+                                value={locationTextValue}
+                                onChange={onLocationTextChange}
+                                label={"Event Location"}
+                            />
+                            <TextField
+                                multiline
+                                maxRows={4}
+                                value={eventDescTextValue}
+                                onChange={onEventDescTextChange}
+                                label={"Event Description"}
+                            />
+                            <TextField
+                                multiline
+                                maxRows={4}
+                                value={notesTextValue}
+                                onChange={onNotesTextChange}
+                                label={"Notes for Attendees"}
+                            />
+                            <Button variant="contained" onClick={trySubmit}>Submit</Button>
+                        </div>
+                    </div>
+                    
+                </Slide>
+            </Collapse>
         </div>
     );
 }
